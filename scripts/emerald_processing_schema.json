@@ -1,0 +1,260 @@
+{
+ "type": "array",
+ "items": {
+  "anyOf": [
+   {
+    "type": "object",
+    "title": "correct_altitude_and_topo",
+    "required": [
+     "emeraldprocessing.pipeline.correct_altitude_and_topo"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.correct_altitude_and_topo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "terrainmodel": {
+        "description": "Path to GeoTIFF with height data",
+        "type": "string",
+        "x-python-type": "builtins.str"
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "object",
+    "title": "cull_below_noise_level",
+    "required": [
+     "emeraldprocessing.pipeline.cull_below_noise_level"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.cull_below_noise_level": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "noise_level_1ms": {
+        "default": 1e-08,
+        "description": "Ambient noise level for mesured data (not normalized by dipole moment) at 1ms. \nThe default is 1e-8.",
+        "type": "number",
+        "x-python-type": "builtins.float"
+       },
+       "noise_exponent": {
+        "default": -0.5,
+        "description": "Exponent describing the decay of the ambient noise as a function of gate-time. \nThe default is -0.5, do not change unless you know what ypu are doing.",
+        "type": "number",
+        "x-python-type": "builtins.float"
+       },
+       "cull_sounding_tails": {
+        "default": true,
+        "description": "Also cull data from subsequent gate times, after the fist gatetime that is below the noise level",
+        "type": "boolean",
+        "x-python-type": "builtins.bool"
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "object",
+    "title": "cull_max_slope",
+    "required": [
+     "emeraldprocessing.pipeline.cull_max_slope"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.cull_max_slope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "max_slope": {
+        "description": "datapoints of the transient curve with slope > max_slope are culled",
+        "type": "number",
+        "x-python-type": "builtins.float"
+       },
+       "cull_sounding_tails": {
+        "default": true,
+        "description": "also cull later time gates if gates with max slope were detected",
+        "type": "boolean",
+        "x-python-type": "builtins.bool"
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "object",
+    "title": "cull_min_slope",
+    "required": [
+     "emeraldprocessing.pipeline.cull_min_slope"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.cull_min_slope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "min_slope": {
+        "default": -3.0,
+        "description": "datapoints of the transient curve with slope < min_slope are culled",
+        "type": "number",
+        "x-python-type": "builtins.float"
+       },
+       "cull_sounding_tails": {
+        "default": true,
+        "type": "boolean",
+        "x-python-type": "builtins.bool"
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "object",
+    "title": "cull_on_geometry_and_inversion_misfit",
+    "required": [
+     "emeraldprocessing.pipeline.cull_on_geometry_and_inversion_misfit"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.cull_on_geometry_and_inversion_misfit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "dirname_xyz_inv": {
+        "default": "path/to/my/inversion/data",
+        "description": "Path to the .xyz files from the inversion. There should be a seperate file for each\n\n    - the input data (your_prefix_dat.xyz)\n    - the inverted model (your_prefix_inv.xyz)\n    - the synthetic (forward) data for the inverted model (your_prefix_inv.xyz)",
+        "type": "string",
+        "x-python-type": "builtins.str"
+       },
+       "fileprefix": {
+        "default": "your_prefix",
+        "description": "prefix for your inversion files, example 'your_prefix'",
+        "type": "string",
+        "x-python-type": "builtins.str"
+       },
+       "obstruction_dict": {
+        "default": {
+         "pipelines": {
+          "file": "/your/file/path/to/Pipelines.shp",
+          "maxRMS": 5.0,
+          "search_dist": 100
+         },
+         "powerlines": {
+          "file": "/your/file/path/to/Powerlines.shp",
+          "maxRMS": 5.0,
+          "search_dist": 100
+         }
+        },
+        "description": "dictinary holding. example: \n    {'pipelines': {'file': '/your/file/path/to/Pipelines.shp', 'maxRMS': 5.0, 'search_dist': 100}, \n     'powerlines': {'file': '/your/file/path/to/Powerlines.shp', 'maxRMS': 5.0, 'search_dist': 100}\nwhere \n    - maxRMS: all data with RMS > maxRMS will be culled\n    - serach_dict: buffer around infrastructure defined by .shp file that will be considered",
+        "type": "object",
+        "x-python-type": "builtins.dict"
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "object",
+    "title": "cull_roll_pitch_alt",
+    "required": [
+     "emeraldprocessing.pipeline.cull_roll_pitch_alt"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.cull_roll_pitch_alt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "max_roll": {
+        "default": 15.0,
+        "description": "Soundings with roll > max_roll will be culled",
+        "type": "number",
+        "x-python-type": "builtins.float"
+       },
+       "max_pitch": {
+        "default": 15.0,
+        "description": "Soundings with pitch > max_pitch will be culled",
+        "type": "number",
+        "x-python-type": "builtins.float"
+       },
+       "max_alt": {
+        "default": 90.0,
+        "description": "Soundings with altitude > max_alt will be culled",
+        "type": "number",
+        "x-python-type": "builtins.float"
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "object",
+    "title": "cull_soundings_with_too_few_gates",
+    "required": [
+     "emeraldprocessing.pipeline.cull_soundings_with_too_few_gates"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.cull_soundings_with_too_few_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "n": {
+        "default": 4,
+        "description": "Soundings with less than n datapoints will be culled entirely",
+        "type": "integer",
+        "x-python-type": "builtins.int"
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "object",
+    "title": "cull_std_threshold",
+    "required": [
+     "emeraldprocessing.pipeline.cull_std_threshold"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.cull_std_threshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "std_threshold": {
+        "default": 0.25,
+        "description": "datapoints with STD's higher than std threshold will be culled",
+        "type": "number",
+        "x-python-type": "builtins.float"
+       },
+       "cull_sounding_tails": {
+        "description": "if True the tail (gates after the fist culled gate) will also be removed",
+        "type": "boolean",
+        "x-python-type": "builtins.bool"
+       }
+      }
+     }
+    }
+   },
+   {
+    "type": "object",
+    "title": "moving_average_filter",
+    "required": [
+     "emeraldprocessing.pipeline.moving_average_filter"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "emeraldprocessing.pipeline.moving_average_filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+     }
+    }
+   }
+  ]
+ },
+ "description": "emeraldprocessing.pipeline_step"
+}

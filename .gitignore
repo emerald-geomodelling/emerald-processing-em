@@ -1,0 +1,14 @@
+build/
+venvProcessing
+venvEMProcessing
+dataExamples
+notebooks/.ipynb_checkpoints
+scripts/TEM/*abstract*.py 
+scripts/TEM/*Guro*.py
+*.egg-info
+__pycache__/
+env/
+.ipynb_checkpoints/
+.idea/
+*~
+.#*
