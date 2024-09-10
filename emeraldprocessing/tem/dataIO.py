@@ -312,10 +312,12 @@ def readSkyTEMxyz(xyz_file, alc_file=None, gex_file=None, removeInititalGates=Tr
     
     if removeInititalGates:
         remove_initial_gates(Data, gex)
-    
-    Data.flightlines.insert(len(Data.flightlines.columns), "disable_reason", ['none' for k in range(len(Data.flightlines))] )
-    # FIXME: is int16 the right dtype here?
-    Data.flightlines.insert(len(Data.flightlines.columns), "coverage", np.int16( np.zeros( len(Data.flightlines) ) ) )
+
+    if "disable_reason" not in Data.flightlines.columns:
+        Data.flightlines.insert(len(Data.flightlines.columns), "disable_reason", ['none' for k in range(len(Data.flightlines))] )
+    if "coverage" not in Data.flightlines.columns:
+        # FIXME: is int16 the right dtype here?
+        Data.flightlines.insert(len(Data.flightlines.columns), "coverage", np.int16( np.zeros( len(Data.flightlines) ) ) )
     
     if 'Alt' in Data.flightlines.columns:
         Data.flightlines.insert(len(Data.flightlines.columns), "TxZ", Data.flightlines['Alt'])
