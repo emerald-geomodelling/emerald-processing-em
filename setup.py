@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name='emeraldprocessing',
-    version='0.1.3',
+    version='0.1.4',
     description="""Processing tools for multi-sounding EM geophysical data""",
     long_description="""Processing tools and and workflow for multi-sounding EM geophysical data.""",
     long_description_content_type="text/markdown",
