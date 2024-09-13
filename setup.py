@@ -11,7 +11,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     authors='Benjamin R. Bloss, Egil Möller, Martin Panzner',
     author_emails='bb@emrld.no, em@emrld.no, mp@emrld.no',
-    url='https://github.com/emerald-geomodelling/EmeraldProcessing',
+    url='https://github.com/emerald-geomodelling/emerald-processing-em',
     packages=setuptools.find_packages(),
     install_requires=[
         "libaarhusxyz",
