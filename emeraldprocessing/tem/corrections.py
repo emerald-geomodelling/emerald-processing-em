@@ -40,16 +40,18 @@ def correct_altitude_and_topo(processing: pipeline.ProcessingData,
     crs = processing.crs
 
     DEM_filename = terrain_model
-     
-    topo_key = 'Topography'
-    orig_topo_key = 'orig_Topography'
-    dem_topo_key = 'dem_Topography'
-    diff_topo_key = 'o_d_diff_Topography'
 
-    alt_key = 'TxAltitude'
-    orig_alt_key = 'orig_TxAltitude'
-    dem_alt_key = 'dem_TxAltitude'
-    diff_alt_key = 'o_d_diff_TxAltitude'
+    # topo_key = 'Topography'
+    topo_key = processing.xyz.z_column
+    orig_topo_key = f'orig_{topo_key}'
+    dem_topo_key = f'dem_{topo_key}'
+    diff_topo_key = f'o_d_diff_{topo_key}'
+
+    # alt_key = 'TxAltitude'
+    alt_key = processing.xyz.alt_column
+    orig_alt_key = f'orig_{alt_key}'
+    dem_alt_key = f'dem_{alt_key}'
+    diff_alt_key = f'o_d_diff_{alt_key}'
 
     # FIXME: how to use the sps files for this here?
     #   need to build an importer for a zip file of sps files - I think %BRB_20240621
