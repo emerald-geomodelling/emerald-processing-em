@@ -222,13 +222,14 @@ def readGPSfromSPS(fullfilename_sps):
                 if key.upper() in words[0]:
                     for n, k in enumerate(['yy', 'mo', 'dd']):
                         output[key][k].append(words[n+1])
-                    hh, mi, ss = words[10].split(':')
-                    sec = np.trunc(np.float64(np.array(ss)))
-                    msec = (np.float64(np.array(ss))-sec)*1000
+                    hh   = int(words[4])
+                    mi   = int(words[5])
+                    sec  = int(words[6])
+                    msec = int(words[7])
                     output[key]['hh'].append(hh)
                     output[key]['mi'].append(mi)
-                    output[key]['ss'].append(sec.astype(int))
-                    output[key]['ms'].append(msec.astype(int))
+                    output[key]['ss'].append(sec)
+                    output[key]['ms'].append(msec)
                     output[key]['lat_nmea'].append(float(words[8]))
                     output[key]['lon_nmea'].append(float(words[9]))
                     output[key]['z_nmea'].append(float(words[17]))
