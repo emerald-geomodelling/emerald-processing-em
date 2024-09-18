@@ -467,6 +467,36 @@ def select_flight_types(processing: pipeline.ProcessingData,
     print(f"  - Time used to reduce the dataset: {end - start} sec.\n")
 
 
+def copy_column(processing: pipeline.ProcessingData,
+                orig: FlightLineColumnName,
+                new: str):
+    """
+    Copy a column in the dataset (data.flightlines) to a new column in the dataset.
+        These are generally attributes in the dataset that are a single value for the sounding, like:
+            'tx_altitude', 'utm_x', 'utm_y', etc.
+        Useful to work around data import and source issues.
+        Warning: This will overwrite data if the new column exists
+
+    Parameters
+    ----------
+    orig :
+        The column to be copied
+    new :
+        The new name of the copied column
+    """
+    start = time.time()
+    print('  - copying a column in the dataset')
+    print(f"\t{orig} ––> {new}")
+
+    if orig not in processing.xyz.flightlines.columns:
+        raise ValueError(
+            "Unknown orig column name '%s' not in [%s]" % (orig, ", ".join(processing.xyz.flightlines.columns)))
+    processing.xyz.flightlines[new] = processing.xyz.flightlines[orig]
+
+    end = time.time()
+    print(f"  - Time used to copy a column in the dataset: {end - start} sec.\n")
+
+
 def rename_column(processing: pipeline.ProcessingData,
                   orig: FlightLineColumnName,
                   new: str):
