@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name='emeraldprocessing',
-    version='0.1.4',
+    version='0.1.5',
     description="""Processing tools for multi-sounding EM geophysical data""",
     long_description="""Processing tools and and workflow for multi-sounding EM geophysical data.""",
     long_description_content_type="text/markdown",
@@ -43,6 +43,8 @@ setuptools.setup(
             'Moving average filter=emeraldprocessing.tem.corrections:moving_average_filter',
             'STD error: Add fractional error=emeraldprocessing.tem.corrections:add_std_error',
             'STD error: Replace from GEX=emeraldprocessing.tem.corrections:add_replace_gex_std_error',
+            'Copy Column=emeraldprocessing.tem.corrections:copy_column',
+            'Copy Data=emeraldprocessing.tem.corrections:copy_data',
             'Rename Column=emeraldprocessing.tem.corrections:rename_column',
             'Rename Data=emeraldprocessing.tem.corrections:rename_data',
             # Cullings:
