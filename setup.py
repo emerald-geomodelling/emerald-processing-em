@@ -44,6 +44,7 @@ setuptools.setup(
             'STD error: Add fractional error=emeraldprocessing.tem.corrections:add_std_error',
             'STD error: Replace from GEX=emeraldprocessing.tem.corrections:add_replace_gex_std_error',
             'Copy Column=emeraldprocessing.tem.corrections:copy_column',
+            'Copy Data=emeraldprocessing.tem.corrections:copy_data',
             'Rename Column=emeraldprocessing.tem.corrections:rename_column',
             'Rename Data=emeraldprocessing.tem.corrections:rename_data',
             # Cullings:
