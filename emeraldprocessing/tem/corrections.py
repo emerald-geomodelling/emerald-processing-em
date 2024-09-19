@@ -526,6 +526,38 @@ def rename_column(processing: pipeline.ProcessingData,
     end = time.time()
     print(f"  - Time used to rename a column in the dataset: {end - start} sec.\n")
 
+
+def copy_data(processing: pipeline.ProcessingData,
+                orig: LayerDataName,
+                new: str):
+    """
+    Copy a group of data in the dataset (data.layer_data[<key>]).
+        These are generally the per-timegate or per-layer dataframes
+            "Gate_Ch01", "InUse_Ch01", 'STD_Ch01', 'relErr_Ch01', etc.
+        Useful to work around data import and source issues.
+        Warning: This will overwrite data if the new group exists
+
+    Parameters
+    ----------
+    orig :
+        The group of data to be copied
+    new :
+        The new name for the copied group of data
+
+    """
+    start = time.time()
+    print('  - Renaming a group in the dataset')
+    print(f"\t{orig} ––> {new}")
+
+    if orig not in processing.xyz.layer_data:
+        raise ValueError(
+            "Unknown orig channel name '%s' not in [%s]" % (orig, ", ".join(processing.xyz.layer_data.keys())))
+    processing.xyz.layer_data[new] = processing.xyz.layer_data[orig]
+
+    end = time.time()
+    print(f"  - Time used to rename a group in the dataset: {end - start} sec.\n")
+
+
 def rename_data(processing: pipeline.ProcessingData,
                 orig: LayerDataName,
                 new: str):
