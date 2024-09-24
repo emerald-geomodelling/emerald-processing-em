@@ -498,15 +498,62 @@ def get_min_periods(filter_length):
     else:
         return 1
 
+def rolling_weighted_mean_df(df_dat, df_err_fp, rolling_lengths):
+    if len(rolling_lengths) == len(df_dat.columns):
+        # Calculate absolute errors
+        df_err_ab = df_dat * df_err_fp
+
+        # Calculate weights
+        weights_df = 1 / df_err_ab ** 2
+
+        # Prepare empty data frames
+        ave_dat = df_dat * np.nan
+        ave_err_abs = df_err_ab * np.nan
+        std_err = df_err_ab * np.nan
+        SEM_df = df_err_ab * np.nan
+
+        for filter_length, col in zip(rolling_lengths, df_out.columns):
+            # Calculate the rolling mean of the absolute error
+            ave_err_abs[col] = df_err_ab[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean
+
+            # Calculate the rolling STD error
+            std_err[col] = df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std()
+
+            # Calculate the weighted average of the data
+            ave_dat[col] = (df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)) *
+                           weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length))).sum() /\
+                           weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum()
+
+            # Calculate the Standard Error of the Mean
+            SEM_df[col] = np.sqrt(weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum() /
+                                  (weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum()) ** 2)
+
+        # Balance the mean, std and sem absolute errors
+        divby = 3
+        balanced_abs_err = ((SEM_df**2)/divby + (std_err**2)/divby + (ave_err_abs**2)/divby)**(1/2)
+
+        # calculate the fractional error of the balanced absolute error
+        Balanced_frac_err = balanced_abs_err / ave_dat
+
+        
+    else:
+        print(f'filter length: {len(rolling_lengths)}')
+        print(f'number of data columns: {len(df_dat.columns)}')
+        print(f'number of std columns: {len(df_err_fp.columns)}')
+        raise Exception('number of rolling filter lengths differs from number of columns in dataframe ')
+    return df_dat_out
+
+
 def rolling_mean_df(df, rolling_lengths):
     if len(rolling_lengths) == len(df.columns):
-        df_out=copy.deepcopy(df)
+        df_out = copy.deepcopy(df)
         for filter_length, col in zip(rolling_lengths, df_out.columns):
-            df_out[col]=df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean()
+            df_out[col] = df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean()
+
     else:
-        print('filter length: {}'.format(len(rolling_lengths)))
-        print('number of columns: {}'.format(len(df.columns)))
-        raise Exception('nuber of rolling fillter lengths differs from number of columns in dataframe ')
+        print(f'filter length: {len(rolling_lengths)}')
+        print(f'number of columns: {len(df.columns)}')
+        raise Exception('number of rolling filter lengths differs from number of columns in dataframe ')
     return df_out
 
 def rolling_square_root_sum_df(df, rolling_lengths):

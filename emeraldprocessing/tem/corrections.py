@@ -202,41 +202,86 @@ def movingAverageFilterLine(lineData,
                             filter_dict,
                             err_calc='rms',
                             verbose=False):
-    for key in lineData.layer_data.keys():
-        if ('Gate' in key) or ('STD' in key):
-            channel_number_str = key.split('_Ch')[-1]
-            filter_key = dat_key_prefix + channel_number_str
+    layer_data_keys = lineData.layer_data.keys()
+    if ('Gate' in layer_data_keys) and ('STD' in layer_data_keys):
+        for key in layer_data_keys:
+            channels_number_str = []
+            if ('Gate' in key):
+                channels_number_str.append(key.split('_Ch')[-1])
+        channels_number_str = sorted(channels_number_str)
+        for channel_number_str in channels_number_str:
+            dat_key = f"{dat_key_prefix}{channel_number_str}"
+            std_key = f"{std_key_prefix}{channel_number_str}"
+            inuse_key = f"{inuse_key_prefix}{channel_number_str}"
+
             if 'ChannelsNumber' in lineData.flightlines.columns:
                 filt = lineData.flightlines.ChannelsNumber.astype(int) == int(channel_number_str)
             else:
                 filt = lineData.flightlines.index
-            
-            if verbose: print('filtering: {0} with filters {1}'.format(key, filter_dict[filter_key]))
-            
-            if type(filter_dict[filter_key]) == int:
+
+            if verbose: print(f'filtering: {dat_key} and {std_key} with filters {filter_dict[dat_key]}')
+
+            if type(filter_dict[dat_key]) == int:
                 # just one number -> box type filter
-                rolling_lengths = utils.interpolate_rolling_size_for_all_gates([filter_dict[filter_key], filter_dict[filter_key]], lineData.layer_data[key])
-            elif len(filter_dict[filter_key]) > 1:
+                rolling_lengths = utils.interpolate_rolling_size_for_all_gates([filter_dict[dat_key], filter_dict[dat_key]],
+                                                                               lineData.layer_data[key])
+            elif len(filter_dict[dat_key]) > 1:
                 # trapeze type filter
-                rolling_lengths = utils.interpolate_rolling_size_for_all_gates(filter_dict[filter_key], lineData.layer_data[key])
+                rolling_lengths = utils.interpolate_rolling_size_for_all_gates(filter_dict[dat_key],
+                                                                               lineData.layer_data[key])
             else:
-                raise Exception('filter lengths must be defined as integer (box filter) or list: [min max] (trapeze filter)')
-        
-        if 'Gate' in key:
-            dBdt_df = copy.deepcopy(lineData.layer_data[key].loc[filt, :])
-            inuse_df = lineData.layer_data[utils.inuse_moment(key)].loc[filt, :]
+                raise Exception('filter lengths must be defined as:\n' +
+                                    '    integer (box filter), or \n' +
+                                    '    list, [width_at_first_gate, width_at_last_gate] (trapeze filter)')
+
+            dBdt_df = copy.deepcopy(lineData.layer_data[dat_key].loc[filt, :])
+            inuse_df = lineData.layer_data[inuse_key].loc[filt, :]
+            std_df = copy.deepcopy(lineData.layer_data[std_key].loc[filt, :])
+
             dBdt_df[inuse_df == 0] = np.nan
+            std_df[inuse_df == 0] = np.nan
+
             lineData.layer_data[key].loc[filt, :] = utils.rolling_mean_df(dBdt_df, rolling_lengths)
-            lineData.layer_data[key][lineData.layer_data[utils.inuse_moment(key)] == 0] = np.nan
-                        
-        elif 'STD_' in key:
-            std_df = lineData.layer_data[key].loc[filt, :]
-            if 'rms' in err_calc.lower():
-                if verbose: print('calculating RMS - STD for {0} using rolling lengths:{1}'.format(key, filter_dict[filter_key]))
-                lineData.layer_data[key] = utils.rolling_square_root_sum_df(std_df, rolling_lengths)
-            elif 'avg' in err_calc.lower():
-                if verbose: print('calculating average - STD for {0} using rolling lengths:{1}'.format(key, filter_dict[filter_key]))
-                lineData.layer_data[key] = utils.rolling_mean_df(std_df, rolling_lengths)
+            lineData.layer_data[key][lineData.layer_data[inuse_key] == 0] = np.nan
+
+    else:
+        for key in layer_data_keys:
+            if ('Gate' in key) or ('STD' in key):
+                channel_number_str = key.split('_Ch')[-1]
+                filter_key = dat_key_prefix + channel_number_str
+                if 'ChannelsNumber' in lineData.flightlines.columns:
+                    filt = lineData.flightlines.ChannelsNumber.astype(int) == int(channel_number_str)
+                else:
+                    filt = lineData.flightlines.index
+
+                if verbose: print('filtering: {0} with filters {1}'.format(key, filter_dict[filter_key]))
+
+                if type(filter_dict[filter_key]) == int:
+                    # just one number -> box type filter
+                    rolling_lengths = utils.interpolate_rolling_size_for_all_gates([filter_dict[filter_key], filter_dict[filter_key]], lineData.layer_data[key])
+                elif len(filter_dict[filter_key]) > 1:
+                    # trapeze type filter
+                    rolling_lengths = utils.interpolate_rolling_size_for_all_gates(filter_dict[filter_key], lineData.layer_data[key])
+                else:
+                    raise Exception('filter lengths must be defined as:\n' +
+                                    '    integer (box filter), or \n' +
+                                    '    list, [width_at_first_gate, width_at_last_gate] (trapeze filter)')
+
+            if 'Gate' in key:
+                dBdt_df = copy.deepcopy(lineData.layer_data[key].loc[filt, :])
+                inuse_df = lineData.layer_data[utils.inuse_moment(key)].loc[filt, :]
+                dBdt_df[inuse_df == 0] = np.nan
+                lineData.layer_data[key].loc[filt, :] = utils.rolling_mean_df(dBdt_df, rolling_lengths)
+                lineData.layer_data[key][lineData.layer_data[utils.inuse_moment(key)] == 0] = np.nan
+
+            elif 'STD_' in key:
+                std_df = lineData.layer_data[key].loc[filt, :]
+                if 'rms' in err_calc.lower():
+                    if verbose: print('calculating RMS - STD for {0} using rolling lengths:{1}'.format(key, filter_dict[filter_key]))
+                    lineData.layer_data[key] = utils.rolling_square_root_sum_df(std_df, rolling_lengths)
+                elif 'avg' in err_calc.lower():
+                    if verbose: print('calculating average - STD for {0} using rolling lengths:{1}'.format(key, filter_dict[filter_key]))
+                    lineData.layer_data[key] = utils.rolling_mean_df(std_df, rolling_lengths)
 
 def correct_data_tilt_for1D(processing: pipeline.ProcessingData,
                             verbose: bool = True):
