@@ -512,7 +512,9 @@ def rolling_weighted_mean_df(df_dat, df_err_fp, rolling_lengths):
         std_err = df_err_ab * np.nan
         SEM_df = df_err_ab * np.nan
 
-        for filter_length, col in zip(rolling_lengths, df_out.columns):
+        weighted_data = df_dat * weights_df
+
+        for filter_length, col in zip(rolling_lengths, df_dat.columns):
             # Calculate the rolling mean of the absolute error
             ave_err_abs[col] = df_err_ab[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean
 
@@ -520,9 +522,8 @@ def rolling_weighted_mean_df(df_dat, df_err_fp, rolling_lengths):
             std_err[col] = df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std()
 
             # Calculate the weighted average of the data
-            ave_dat[col] = (df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)) *
-                           weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length))).sum() /\
-                           weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum()
+            ave_dat[col] = weighted_data[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum() / \
+                              weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum()
 
             # Calculate the Standard Error of the Mean
             SEM_df[col] = np.sqrt(weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum() /
