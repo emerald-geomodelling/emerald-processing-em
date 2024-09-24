@@ -177,10 +177,6 @@ def moving_average_filter(processing: pipeline.ProcessingData,
     filter_dict :
         Dictionary describing the filter widths for the first and the last gate 
         of each moment/channel . The default is {'Gate_Ch01':[3, 5], 'Gate_Ch02':[5, 9]}.
-    # err_calc :
-    #     switch for how to compute the STD's inside the averaging window. Allowed options are:
-    #         - 'rms' (default) root-mean-square sum of the STD's inside the averaging window
-    #         - 'avg'  simple average of the STD's inside the averaging window
     verbose :
         If True, more output about what the filter is doing
     """
