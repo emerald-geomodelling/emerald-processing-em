@@ -20,6 +20,7 @@ from .parameter_types import RasterUrl
 from .parameter_types import FlightlinesList
 from .parameter_types import MovingAverageFilterDict
 from .parameter_types import FlightType, AvailableFlightTypeList
+from .parameter_types import HiddenString, HiddenBool
 
 def correct_altitude_and_topo(processing: pipeline.ProcessingData,
                               terrain_model: RasterUrl,
@@ -161,7 +162,7 @@ def moving_average_filter(processing: pipeline.ProcessingData,
                                                                                  'last_gate': 5},
                                                                   'Gate_Ch02': {'first_gate': 5,
                                                                                  'last_gate': 9}},
-                          err_calc: typing.Literal['rms', 'avg'] = 'rms',
+                          # err_calc: HiddenString = 'rms',
                           verbose: bool = False):
     """
     Moving average filter, averaging Gate values from neighboring soundings

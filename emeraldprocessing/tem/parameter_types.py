@@ -1,6 +1,11 @@
 import typing
 import pydantic
 
+HiddenString = typing.Annotated[
+    str, {
+        'json_schema': {
+            "hide": True}}]
+
 HiddenBool = typing.Annotated[
     bool, {
         'json_schema': {
