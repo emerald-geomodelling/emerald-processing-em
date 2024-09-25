@@ -46,6 +46,8 @@ def cull_roll_pitch_alt(processing: pipeline.ProcessingData,
 
     Parameters
     ----------
+    channel :
+        Channel to disable soundings from
     max_roll :
         Maximum Tx roll angle deviation from 0, in degrees.
     max_pitch :
