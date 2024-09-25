@@ -186,12 +186,18 @@ def moving_average_filter(processing: pipeline.ProcessingData,
         We find that 2 to 3 is a good value.
     error_calc_scheme :
         Method to calculate errors. Methods include:
-            'Weighted_SEM' : Recommended. error_calc = sqrt(weights / weights^2)
-            'Balanced_1' : error_calc = (Weighted_SEM * Unweighted_SEM * Average * STD)^(1/4)
-            'Average' : error_calc = average(error)
-            'Balanced_2' : Not Recommended. error_calc = sqrt((Weighted_SEM^2)/4 + (Unweighted_SEM^2)/4 + (Average^2)/4 + (STD^2)/4)
-            'STD' : Not Recommended. error_calc = std(data)
-            'Unweighted_SEM' : Not Recommended. error_calc = std(data) / sqrt(number_elements(data))
+            'Weighted_SEM' : Recommended. Weighted Standard Error of the Mean.
+                error_calc = sqrt(weights / weights^2)
+            'Balanced_1' :
+                error_calc = (Weighted_SEM * Unweighted_SEM * Average * STD)^(1/4)
+            'Average' :
+                error_calc = average(error)
+            'Balanced_2' : Not Recommended.
+                error_calc = sqrt((Weighted_SEM^2)/4 + (Unweighted_SEM^2)/4 + (Average^2)/4 + (STD^2)/4)
+            'STD' : Not Recommended.
+                error_calc = std(data)
+            'Unweighted_SEM' : Not Recommended. Unweighted Standard Error of the Mean
+                error_calc = std(data) / sqrt(number_elements(data))
     verbose :
         If True, more output about what the filter is doing
     """
