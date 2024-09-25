@@ -58,7 +58,7 @@ def cull_roll_pitch_alt(processing: pipeline.ProcessingData,
         If True, more output about what the filter is doing
     """
     start = time.time()
-    print(f"  - Disabling based on roll (±{max_roll}°), pitch(±{max_pitch}°), and altitude ({max_alt} m) limits")
+    print(f"  - Disabling channel {channel} based on roll (±{max_roll}°), pitch(±{max_pitch}°), and altitude ({max_alt} m) limits")
     data = processing.xyz
 
     roll_key = data.tilt_roll_column
