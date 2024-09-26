@@ -305,6 +305,7 @@ def movingAverageFilterLine(lineData,
             dBdt_df = copy.deepcopy(lineData.layer_data[dat_key].loc[filt, :])
             inuse_df = lineData.layer_data[utils.inuse_moment(dat_key)].loc[filt, :]
             dBdt_df[inuse_df == 0] = np.nan
+
             lineData.layer_data[dat_key].loc[filt, :], lineData.layer_data[std_key].loc[filt, :]  = utils.rolling_mean_df(dBdt_df, rolling_lengths, error_calc_scheme='Unweighted_SEM')
 
             lineData.layer_data[dat_key][lineData.layer_data[utils.inuse_moment(dat_key)] == 0] = np.nan
