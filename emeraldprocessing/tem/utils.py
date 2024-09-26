@@ -554,12 +554,12 @@ def rolling_weighted_mean_df(df_dat, df_err_fp, rolling_lengths, weighting_facto
                              mean_weight           * (ave_err_abs_df**2)    / divide_by  )**(1/2)
 
         # calculate the fractional error of the balanced absolute error
-        weighted_SEM_frac_err =     weighted_SEM_df / ave_dat
-        unweighted_SEM_frac_err = unweighted_SEM_df / ave_dat
-        std_frac_err =                   std_err_df / ave_dat
-        ave_frac_err =               ave_err_abs_df / ave_dat
-        balanced_frac_err1 =      balanced_abs_err1 / ave_dat
-        balanced_frac_err2 =      balanced_abs_err2 / ave_dat
+        weighted_SEM_frac_err =     np.abs(weighted_SEM_df / ave_dat)
+        unweighted_SEM_frac_err = np.abs(unweighted_SEM_df / ave_dat)
+        std_frac_err =                   np.abs(std_err_df / ave_dat)
+        ave_frac_err =               np.abs(ave_err_abs_df / ave_dat)
+        balanced_frac_err1 =      np.abs(balanced_abs_err1 / ave_dat)
+        balanced_frac_err2 =      np.abs(balanced_abs_err2 / ave_dat)
 
         if error_calc_scheme == 'Weighted_SEM':
             return ave_dat, weighted_SEM_frac_err
