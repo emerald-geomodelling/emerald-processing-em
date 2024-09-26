@@ -213,9 +213,9 @@ def moving_average_filter(processing: pipeline.ProcessingData,
 
     layer_data_keys = data.layer_data.keys()
     if sum([(std_key_prefix in key) for key in layer_data_keys]) > 0:
-        print(f"  - Error estimates have been found!")
+        print(f"  - Error estimates have been found! Using the {error_calc_scheme} method to calculate the average")
     elif sum([(dat_key_prefix in key) for key in layer_data_keys]) > 0:
-        print("  - Found the data but no error estimates. will calculate errors from the unweighted SEM")
+        print("  - Found the data but no error estimates. will calculate errors using the Unweighted_SEM method")
     else:
         print("This is bad, no data and no error estimates!")
 
@@ -312,7 +312,9 @@ def movingAverageFilterLine(lineData,
             inuse_df = lineData.layer_data[utils.inuse_moment(dat_key)].loc[filt, :]
             dBdt_df[inuse_df == 0] = np.nan
 
-            lineData.layer_data[dat_key].loc[filt, :], lineData.layer_data[std_key].loc[filt, :]  = utils.rolling_mean_df(dBdt_df, rolling_lengths, error_calc_scheme='Unweighted_SEM')
+            lineData.layer_data[dat_key].loc[filt, :], lineData.layer_data[std_key].loc[filt, :]  = utils.rolling_mean_df(dBdt_df,
+                                                                                                                          rolling_lengths,
+                                                                                                                          error_calc_scheme='Unweighted_SEM')
 
             lineData.layer_data[dat_key][lineData.layer_data[utils.inuse_moment(dat_key)] == 0] = np.nan
             lineData.layer_data[std_key][lineData.layer_data[utils.inuse_moment(dat_key)] == 0] = np.nan
