@@ -2,7 +2,8 @@ import typing
 import pydantic
 
 
-ErrorCalcString = typing.Literal['Weighted_SEM', 'Balanced_1', 'Average', 'Balanced_2', 'STD', 'Unweighted_SEM']
+WeightedErrorCalcString = typing.Literal['Weighted_SEM', 'Balanced_1', 'Average', 'Unweighted_SEM', 'Balanced_2', 'STD']
+UnweightedErrorCalcString = typing.Literal['Unweighted_SEM', 'STD']
 
 HiddenString = typing.Annotated[
     str, {

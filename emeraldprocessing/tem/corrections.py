@@ -21,7 +21,7 @@ from .parameter_types import FlightlinesList
 from .parameter_types import MovingAverageFilterDict
 from .parameter_types import FlightType, AvailableFlightTypeList
 # from .parameter_types import HiddenString, HiddenBool
-from .parameter_types import ErrorCalcString
+from .parameter_types import WeightedErrorCalcString, UnweightedErrorCalcString
 
 def correct_altitude_and_topo(processing: pipeline.ProcessingData,
                               terrain_model: RasterUrl,
@@ -164,14 +164,14 @@ def moving_average_filter(processing: pipeline.ProcessingData,
                                                                   'Gate_Ch02': {'first_gate': 5,
                                                                                  'last_gate': 9}},
                           weighting_factor: float = 3,
-                          error_calc_scheme: ErrorCalcString = 'Weighted_SEM',
+                          error_calc_scheme: WeightedErrorCalcString = 'Weighted_SEM',
                           verbose: bool = False):
     """
     Moving average filter, averaging Gate values from neighboring soundings.
       If both data and error estimates exist than the data will be averaged using a rolling weighted averaging scheme,
         where the weights are the inverse of the square absolute error (1 / (ab_error^2)).
       If only data exists then the output will be a rolling average and error estimates will be from the
-        standard_deviation from the same rolling window.
+        unweighted standard error of the mean from the same rolling window.
     Results will always include error estimates in fractional percent (0.1 = 10%)
 
     Parameters
@@ -230,7 +230,8 @@ def movingAverageFilterLine(lineData,
                             error_calc_scheme='Weighted_SEM',
                             verbose=False):
     layer_data_keys = lineData.layer_data.keys()
-    if ('Gate' in layer_data_keys) and ('STD' in layer_data_keys):
+    if sum([(std_key_prefix in key) for key in layer_data_keys]) > 0:
+        print(f"  - Error estimates have been found!")
         for key in layer_data_keys:
             channels_number_str = []
             if 'Gate' in key:
@@ -279,6 +280,7 @@ def movingAverageFilterLine(lineData,
     else:
         for key in layer_data_keys:
             if 'Gate' in key:
+                print("  - Found the data but no error estimates. will calculate errors from the unweighted SEM")
                 channel_number_str = key.split('_Ch')[-1]
                 dat_key = dat_key_prefix + channel_number_str
                 std_key = std_key_prefix + channel_number_str
@@ -303,7 +305,7 @@ def movingAverageFilterLine(lineData,
             dBdt_df = copy.deepcopy(lineData.layer_data[dat_key].loc[filt, :])
             inuse_df = lineData.layer_data[utils.inuse_moment(dat_key)].loc[filt, :]
             dBdt_df[inuse_df == 0] = np.nan
-            lineData.layer_data[dat_key].loc[filt, :], lineData.layer_data[std_key].loc[filt, :]  = utils.rolling_mean_df(dBdt_df, rolling_lengths)
+            lineData.layer_data[dat_key].loc[filt, :], lineData.layer_data[std_key].loc[filt, :]  = utils.rolling_mean_df(dBdt_df, rolling_lengths, error_calc_scheme='Unweighted_SEM')
 
             lineData.layer_data[dat_key][lineData.layer_data[utils.inuse_moment(dat_key)] == 0] = np.nan
             lineData.layer_data[std_key][lineData.layer_data[utils.inuse_moment(dat_key)] == 0] = np.nan

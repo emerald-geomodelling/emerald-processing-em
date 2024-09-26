@@ -527,7 +527,7 @@ def rolling_weighted_mean_df(df_dat, df_err_fp, rolling_lengths, weighting_facto
             std_err_df[col] = df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std()
 
             # Calculate the unweighted Standard Error of the Mean
-            unweighted_SEM_df = df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std() / np.sqrt(filter_length)
+            unweighted_SEM_df[col] = df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std() / np.sqrt(filter_length)
 
             # Calculate the weighted average of the data
             ave_dat[col] = weighted_data[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum() / \
@@ -582,22 +582,35 @@ def rolling_weighted_mean_df(df_dat, df_err_fp, rolling_lengths, weighting_facto
         raise Exception('number of rolling filter lengths differs from number of columns in dataframe ')
 
 
-def rolling_mean_df(df, rolling_lengths):
-    if len(rolling_lengths) == len(df.columns):
-        ave_dat = copy.deepcopy(df) * np.nan
-        ab_err =  copy.deepcopy(df) * np.nan
+def rolling_mean_df(df_dat, rolling_lengths, error_calc_scheme='Unweighted_SEM'):
+    if len(rolling_lengths) == len(df_dat.columns):
+        # Prepare empty data frames
+        ave_dat = df_dat * np.nan
+        std_err_df = df_dat * np.nan
+        unweighted_SEM_df = df_dat * np.nan
 
-        for filter_length, col in zip(rolling_lengths, df.columns):
-            ave_dat[col] = df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean()
-            ab_err[col] = df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std()
+        for filter_length, col in zip(rolling_lengths, df_dat.columns):
+            # Calculate the rolling STD error
+            std_err_df[col] = df_dat[col].rolling(filter_length, center=True,
+                                                  min_periods=get_min_periods(filter_length)).std()
 
-        err_dat = ab_err / ave_dat  # error should be in fractional percent
+            # Calculate the unweighted Standard Error of the Mean
+            unweighted_SEM_df[col] = df_dat[col].rolling(filter_length, center=True,
+                                                    min_periods=get_min_periods(filter_length)).std() / np.sqrt(filter_length)
 
-        return ave_dat, err_dat
+            ave_dat[col] = df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean()
+
+        unweighted_SEM_frac_err = np.abs(unweighted_SEM_df / ave_dat)
+        std_frac_err = np.abs(std_err_df / ave_dat)
+
+        if error_calc_scheme == 'Unweighted_SEM':
+            return ave_dat, unweighted_SEM_frac_err
+        elif error_calc_scheme == 'STD':
+            return ave_dat, std_frac_err
 
     else:
         print(f'filter length: {len(rolling_lengths)}')
-        print(f'number of columns: {len(df.columns)}')
+        print(f'number of columns: {len(df_dat.columns)}')
         raise Exception('number of rolling filter lengths differs from number of columns in dataframe ')
 
 
