@@ -37,6 +37,7 @@ def cull_roll_pitch_alt(processing: pipeline.ProcessingData,
                         max_roll: float = 10.,
                         max_pitch: float = 10.,
                         max_alt: float = 110.,
+                        min_alt: float = 5.,
                         verbose: bool = False,
                         save_filter_to_layer_data: HiddenBool = False):
     """
@@ -50,6 +51,8 @@ def cull_roll_pitch_alt(processing: pipeline.ProcessingData,
         Maximum Tx pitch angle deviation from 0, in degrees.
     max_alt :
         Maximum Tx altitude, in meters above terrain surface
+    min_alt :
+        Minimum Tx altitude, in meters above terrain surface
     verbose :
         If True, more output about what the filter is doing
     """
@@ -61,16 +64,13 @@ def cull_roll_pitch_alt(processing: pipeline.ProcessingData,
     pitch_key = data.tilt_pitch_column
     alt_key = data.alt_column
 
-    # roll_key = 'TxRoll'
-    # pitch_key = 'TxPitch'
-    # alt_key = 'TxAltitude'
-
     idx = pd.DataFrame(columns=["roll", "pitch", "alt"], dtype=bool)
     idx['roll'] = data.flightlines[roll_key].abs() > max_roll
     idx['pitch'] = data.flightlines[pitch_key].abs() > max_pitch
-    idx['alt'] = data.flightlines[alt_key] > max_alt
-    
-    fl_filt =  idx.roll | idx.pitch | idx.alt
+    idx['alt_max'] = data.flightlines[alt_key] >= max_alt
+    idx['alt_min'] = data.flightlines[alt_key] < min_alt
+
+    fl_filt =  idx.roll | idx.pitch | idx.alt_max | idx.alt_min
 
     inuse_key_list = [key for key in data.layer_data.keys() if inuse_key_prefix in key]
     for inuse_key in inuse_key_list:
@@ -84,8 +84,8 @@ def cull_roll_pitch_alt(processing: pipeline.ProcessingData,
             new_iu_key = f"disable_tilt_alt_{inuse_key}"
             data.layer_data[new_iu_key] = inuse_df
     
-    data.flightlines.loc[idx.roll | idx.pitch, 'disable_reason'] = 'roll_pitch'
-    data.flightlines.loc[idx.alt, 'disable_reason'] = 'alt'
+    data.flightlines.loc[idx.roll | idx.pitch, 'disable_reason'] = 'tilt'
+    data.flightlines.loc[idx.alt_max | idx.alt_min, 'disable_reason'] = 'alt'
 
     pre_dat_stats = data.flightlines.loc[:, [roll_key, pitch_key, alt_key]].describe()
     pre_dat_stats.columns.name = "Pre-disable Tx_ Pitch, Alt stats"
