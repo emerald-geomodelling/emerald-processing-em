@@ -210,7 +210,15 @@ def moving_average_filter(processing: pipeline.ProcessingData,
     for moment in filter_dict.keys():
         filter_list_dict[moment] = [filter_dict[moment]['first_gate'],
                                     filter_dict[moment]['last_gate']]
-    
+
+    layer_data_keys = data.layer_data.keys()
+    if sum([(std_key_prefix in key) for key in layer_data_keys]) > 0:
+        print(f"  - Error estimates have been found!")
+    elif sum([(dat_key_prefix in key) for key in layer_data_keys]) > 0:
+        print("  - Found the data but no error estimates. will calculate errors from the unweighted SEM")
+    else:
+        print("This is bad, no data and no error estimates!")
+
     lines = utils.splitData_lines(data, line_key='Line')
     for line in lines.keys():
         if verbose: 
@@ -231,7 +239,6 @@ def movingAverageFilterLine(lineData,
                             verbose=False):
     layer_data_keys = lineData.layer_data.keys()
     if sum([(std_key_prefix in key) for key in layer_data_keys]) > 0:
-        print(f"  - Error estimates have been found!")
         for key in layer_data_keys:
             channels_number_str = []
             if 'Gate' in key:
@@ -280,7 +287,6 @@ def movingAverageFilterLine(lineData,
     else:
         for key in layer_data_keys:
             if 'Gate' in key:
-                print("  - Found the data but no error estimates. will calculate errors from the unweighted SEM")
                 channel_number_str = key.split('_Ch')[-1]
                 dat_key = dat_key_prefix + channel_number_str
                 std_key = std_key_prefix + channel_number_str
