@@ -1,6 +1,14 @@
 import typing
 import pydantic
 
+
+ErrorCalcString = typing.Literal['Weighted_SEM', 'Balanced_1', 'Average', 'Balanced_2', 'STD', 'Unweighted_SEM']
+
+HiddenString = typing.Annotated[
+    str, {
+        'json_schema': {
+            "hide": True}}]
+
 HiddenBool = typing.Annotated[
     bool, {
         'json_schema': {

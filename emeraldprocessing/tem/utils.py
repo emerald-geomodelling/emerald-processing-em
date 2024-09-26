@@ -498,16 +498,108 @@ def get_min_periods(filter_length):
     else:
         return 1
 
+def rolling_weighted_mean_df(df_dat, df_err_fp, rolling_lengths, weighting_factor=3, error_calc_scheme='Weighted_SEM'):
+    assert weighting_factor > 0, "weighting_factor must be greater than 0. Suggested ranges are between 1 [Weights are only based on the errors - errors will be smaller] and 10 [errors will be bigger]"
+    if len(rolling_lengths) == len(df_dat.columns):
+        # Calculate absolute errors
+        df_err_ab = df_dat * df_err_fp
+
+        # Calculate weights
+        # FIXME: I'm applying a factor of 3 here. This is purely determined experimentally. Since this is just a
+        #   weighting function I think it's ok?
+        weights_df = 1 / (weighting_factor * (df_err_ab**2))
+
+        # Build weighted data df for the averaging.
+        weighted_data = df_dat * weights_df
+
+        # Prepare empty data frames
+        ave_dat = df_dat * np.nan
+        ave_err_abs_df = df_err_ab * np.nan
+        std_err_df = df_err_ab * np.nan
+        unweighted_SEM_df = df_err_ab * np.nan
+        weighted_SEM_df = df_err_ab * np.nan
+
+        for filter_length, col in zip(rolling_lengths, df_dat.columns):
+            # Calculate the rolling mean of the absolute error
+            ave_err_abs_df[col] = df_err_ab[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean()
+
+            # Calculate the rolling STD error
+            std_err_df[col] = df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std()
+
+            # Calculate the unweighted Standard Error of the Mean
+            unweighted_SEM_df = df_dat[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std() / np.sqrt(filter_length)
+
+            # Calculate the weighted average of the data
+            ave_dat[col] = weighted_data[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum() / \
+                              weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum()
+
+            # Calculate the weighted Standard Error of the Mean
+            weighted_SEM_df[col] = (weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum() /
+                                   (weights_df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).sum()**2))**(1/2)
+
+        # Balance absolute errors by the 1) the mean, 2) the STD, and 3) the weighted SEM 4) unweighted SEM
+        # FIXME: I have a hard time to justify this balancing, but without it I feel that the errors from the SEM alone are too small
+        unweighted_SEM_weight = 1
+        weighted_SEM_weight = 1
+        STD_weight = 1
+        mean_weight = 1
+
+        divide_by = unweighted_SEM_weight + weighted_SEM_weight + STD_weight + mean_weight
+
+        balanced_abs_err1 = (unweighted_SEM_df * weighted_SEM_df * std_err_df * ave_err_abs_df) ** (1 / divide_by)
+
+        balanced_abs_err2 = (unweighted_SEM_weight * (unweighted_SEM_df**2) / divide_by +
+                             weighted_SEM_weight   * (weighted_SEM_df**2)   / divide_by +
+                             STD_weight            * (std_err_df**2)        / divide_by +
+                             mean_weight           * (ave_err_abs_df**2)    / divide_by  )**(1/2)
+
+        # calculate the fractional error of the balanced absolute error
+        weighted_SEM_frac_err =     np.abs(weighted_SEM_df / ave_dat)
+        unweighted_SEM_frac_err = np.abs(unweighted_SEM_df / ave_dat)
+        std_frac_err =                   np.abs(std_err_df / ave_dat)
+        ave_frac_err =               np.abs(ave_err_abs_df / ave_dat)
+        balanced_frac_err1 =      np.abs(balanced_abs_err1 / ave_dat)
+        balanced_frac_err2 =      np.abs(balanced_abs_err2 / ave_dat)
+
+        if error_calc_scheme == 'Weighted_SEM':
+            return ave_dat, weighted_SEM_frac_err
+        elif error_calc_scheme == 'Balanced_1':
+            return ave_dat, balanced_frac_err1
+        elif error_calc_scheme == 'Average':
+            return ave_dat, ave_frac_err
+        elif error_calc_scheme == 'Balanced_2':
+            return ave_dat, balanced_frac_err2
+        elif error_calc_scheme == 'STD':
+            return ave_dat, std_frac_err
+        elif error_calc_scheme == 'Unweighted_SEM':
+            return ave_dat, unweighted_SEM_frac_err
+
+
+    else:
+        print(f'filter length: {len(rolling_lengths)}')
+        print(f'number of data columns: {len(df_dat.columns)}')
+        print(f'number of std columns: {len(df_err_fp.columns)}')
+        raise Exception('number of rolling filter lengths differs from number of columns in dataframe ')
+
+
 def rolling_mean_df(df, rolling_lengths):
     if len(rolling_lengths) == len(df.columns):
-        df_out=copy.deepcopy(df)
-        for filter_length, col in zip(rolling_lengths, df_out.columns):
-            df_out[col]=df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean()
+        ave_dat = copy.deepcopy(df) * np.nan
+        ab_err =  copy.deepcopy(df) * np.nan
+
+        for filter_length, col in zip(rolling_lengths, df.columns):
+            ave_dat[col] = df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).mean()
+            ab_err[col] = df[col].rolling(filter_length, center=True, min_periods=get_min_periods(filter_length)).std()
+
+        err_dat = ab_err / ave_dat  # error should be in fractional percent
+
+        return ave_dat, err_dat
+
     else:
-        print('filter length: {}'.format(len(rolling_lengths)))
-        print('number of columns: {}'.format(len(df.columns)))
-        raise Exception('nuber of rolling fillter lengths differs from number of columns in dataframe ')
-    return df_out
+        print(f'filter length: {len(rolling_lengths)}')
+        print(f'number of columns: {len(df.columns)}')
+        raise Exception('number of rolling filter lengths differs from number of columns in dataframe ')
+
 
 def rolling_square_root_sum_df(df, rolling_lengths):
     if len(rolling_lengths) == len(df.columns):
