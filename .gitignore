@@ -12,3 +12,15 @@ env/
 .idea/
 *~
 .#*
+emeraldprocessing/debug/
+sprints/
+
+# macOS + venvs + Claude Code
+.DS_Store
+.venv/
+.claude/
+CLAUDE.md
+claude.md
+
+# Test prototype output (runtime artifacts)
+tests/prototype_output/
