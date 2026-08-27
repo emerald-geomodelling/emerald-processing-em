@@ -281,7 +281,7 @@ class FlightParameterPlotter(object):
         for line in lines:
             if line == 0:
                 tflightlines = flightlines.copy()
-                tflightlines.Line.loc[tflightlines.Line != line] = np.NaN
+                tflightlines.Line.loc[tflightlines.Line != line] = np.nan
             else:
                 tflightlines = flightlines.loc[flightlines.Line == line]
     
