@@ -201,7 +201,7 @@ def _PlotFlightLinesFromSPS(FlightDF, axs, crs, lines, basemap):
     for line in lines:
         if line == 0:
             tflightlines = FlightDF.copy()
-            tflightlines.Line.loc[tflightlines.Line != line] = np.NaN
+            tflightlines.Line.loc[tflightlines.Line != line] = np.nan
         else:
             tflightlines = FlightDF.loc[FlightDF.Line == line]
 
